@@ -7,24 +7,23 @@ namespace SkillSwap.Models
     public class UserModel : BaseModel
     {
         [Required]
-        [Column(TypeName = "varchar(100)")]
-        [StringLength(100)]
-        public required string FirstName { get; set; }
+        [Column(TypeName = "varchar(64)")]
+        [StringLength(64)]
+        public required string UserName { get; set; }
 
         [Required]
-        [Column(TypeName = "varchar(100)")]
-        [StringLength(100)]
-        public required string LastName { get; set; }
-
-        [Required]
-        [Column(TypeName = "varchar(256)")]
-        [StringLength(256)]
+        [Column(TypeName = "varchar(64)")]
+        [StringLength(64)]
         [EmailAddress]
-        public required string Email  { get; set; }
+        public required string Email { get; set; }
+
+        [Column(TypeName = "varchar(1024)")]
+        [StringLength(1024)]
+        public string? About { get; set; } = null;
 
         [Required]
-        [Column(TypeName = "varchar(256)")]
-        [StringLength(256)]
+        [Column(TypeName = "char(60)")]
+        [StringLength(60)]
         public required string PasswordHash { get; set; }
     }
 }

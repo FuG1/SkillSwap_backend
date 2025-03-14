@@ -1,63 +1,54 @@
-using Microsoft.EntityFrameworkCore;
-using SkillSwap.Contexts;
-using SkillSwap.Models;
+﻿using SkillSwap.Models;
+using SkillSwap.Interfaces;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace SkillSwap.Services
 {
     public interface IAuthService
     {
-        public Task<string?> RegisterAsync(string firstName, string lastName, string email, string password);
-        public Task<string?> LoginAsync(string email, string password);
+        Task<string?> LoginAsync(string email, string password);
+        Task<string?> RegisterAsync(string username, string email, string password);
     }
 
-    public class AuthService(ApplicationContext context, IPasswordService passwordService, IJwtService jwtService) : IAuthService
+    public class AuthService(IUserService userService, IJwtService jwtService) : IAuthService
     {
-        private readonly ApplicationContext _context = context;
-        private readonly IPasswordService _passwordService = passwordService;
+        private readonly IUserService _userService = userService;
         private readonly IJwtService _jwtService = jwtService;
 
-        public async Task<string?> RegisterAsync(string firstName, string lastName, string email, string password)
+        public async Task<string?> LoginAsync(string login, string password)
         {
-            if (await _context.Users.AnyAsync(u => u.Email == email))
+            var user = await _userService.GetUserByEmailAsync(login);
+            if (user == null)
             {
                 return null;
             }
-
-            var user = new UserModel
+            if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+                return null;
+            return _jwtService.GenerateToken(new ITokenPayload
             {
-                FirstName = firstName,
-                LastName = lastName,
-                Email = email,
-                PasswordHash = _passwordService.HashPassword(password)
-            };
-
-            _context.Users.Add(user);
-            await _context.SaveChangesAsync();
-
-            var claims = new Dictionary<string, string>
-            {
-                { "FirstName", user.FirstName },
-                { "LastName", user.LastName }
-            };
-
-            return _jwtService.GenerateToken(user.Id.ToString(), claims);
+                UserId = user.Id
+            });
         }
 
-        public async Task<string?> LoginAsync(string email, string password)
+        public async Task<string?> RegisterAsync(string username, string email, string password)
         {
-            var user = await _context.Users.SingleOrDefaultAsync(u => u.Email == email);
-            if (user == null || !_passwordService.VerifyPassword(password, user.PasswordHash))
+            var user = await _userService.GetUserByEmailAsync(email);
+            if (user != null)
             {
                 return null;
             }
-
-            var claims = new Dictionary<string, string>
+            var newUser = await _userService.CreateUserAsync(new UserModel
             {
-                { "FirstName", user.FirstName },
-                { "LastName", user.LastName }
-            };
-
-            return _jwtService.GenerateToken(user.Id.ToString(), claims);
+                UserName = username,
+                Email = email,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(password)
+            });
+            return _jwtService.GenerateToken(new ITokenPayload
+            {
+                UserId = newUser.Id
+            });
         }
     }
 }

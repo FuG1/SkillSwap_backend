@@ -1,90 +1,66 @@
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
+using SkillSwap.Interfaces;
+using SkillSwap.Models;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using SkillSwap.Interfaces.Options;
 
 namespace SkillSwap.Services
 {
     public interface IJwtService
     {
-        string? GenerateToken(string userId, IDictionary<string, string> claims);
-        bool ValidateToken(string token, out IDictionary<string, string> claims);
+        public string GenerateToken(ITokenPayload payload);
+        public ITokenPayload? VerifyToken(string token);
     }
 
     public class JwtService : IJwtService
     {
-        private readonly string _secret;
-        private readonly string _issuer;
-        private readonly string _audience;
+        private readonly IJwtOptions _jwtOptions;
+        private readonly JwtSecurityTokenHandler _jwtHandler;
+        private readonly SymmetricSecurityKey _securityKey;
+        private readonly JwtHeader _jwtHeader;
 
-        public JwtService(IConfiguration configuration)
+        public JwtService(IOptions<IJwtOptions> jwtOptions)
         {
-            _secret = configuration["Jwt:Secret"];
-            _issuer = configuration["Jwt:Issuer"];
-            _audience = configuration["Jwt:Audience"];
+            _jwtOptions = jwtOptions.Value;
+            _jwtHandler = new JwtSecurityTokenHandler();
+            _securityKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_jwtOptions.SecurityKey));
+            var credentials = new SigningCredentials(_securityKey, _jwtOptions.EncryptionAlgorithm);
+            _jwtHeader = new JwtHeader(credentials);
         }
 
-        public string? GenerateToken(string userId, IDictionary<string, string> claims)
+        public string GenerateToken(ITokenPayload payload)
         {
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var jwtPayload = new JwtPayload() {
+                { _jwtOptions.Fields.UserId, Convert.ToInt32(payload.UserId) },
+                { _jwtOptions.Fields.Expiration, DateTime.UtcNow.AddSeconds(_jwtOptions.Expiration).Ticks }
+            };
+            var jwtToken = new JwtSecurityToken(_jwtHeader, jwtPayload);
+            var token = _jwtHandler.WriteToken(jwtToken);
+            return token;
+        }
 
-            var tokenClaims = new List<Claim>
+        public ITokenPayload? VerifyToken(string token)
         {
-            new(JwtRegisteredClaimNames.Sub, userId),
-            new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
-
             try
             {
-                foreach (var claim in claims)
+                _jwtHandler.ValidateToken(token, new TokenValidationParameters()
                 {
-                    tokenClaims.Add(new Claim(claim.Key, claim.Value));
-                }
+                    IssuerSigningKey = _securityKey,
+                    ValidateAudience = false,
+                    ValidateIssuer = false,
+                }, out SecurityToken securityToken);
 
-                var token = new JwtSecurityToken(
-                    issuer: _issuer,
-                    audience: _audience,
-                    claims: tokenClaims,
-                    expires: DateTime.Now.AddHours(1),
-                    signingCredentials: credentials);
-
-                return new JwtSecurityTokenHandler().WriteToken(token);
+                var jwtSecurityToken = securityToken as JwtSecurityToken;
+                return new()
+                {
+                    UserId = Convert.ToInt32(jwtSecurityToken!.Payload[_jwtOptions.Fields.UserId])
+                };
             }
             catch
             {
                 return null;
-            }
-        }
-
-        public bool ValidateToken(string token, out IDictionary<string, string> claims)
-        {
-            claims = new Dictionary<string, string>();
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = true,
-                ValidateIssuerSigningKey = true,
-                ValidIssuer = _issuer,
-                ValidAudience = _audience,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_secret))
-            };
-
-            try
-            {
-                var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
-                foreach (var claim in principal.Claims)
-                {
-                    claims[claim.Type] = claim.Value;
-                }
-                return true;
-            }
-            catch
-            {
-                return false;
             }
         }
     }

@@ -1,12 +1,11 @@
 {
   "Version": 1,
-  "Hash": "zfl29iwMpAP2ajTQsd2e6F1VLYqcT+9YOmb51lqcRfQ=",
+  "Hash": "f57345eUjGN5fEG5Vpf7WdPthb+WC2SV1Fbjz8wODVE=",
   "Source": "skillswap",
   "BasePath": "_content/skillswap",
   "Mode": "Default",
   "ManifestType": "Build",
   "ReferencedProjectsConfiguration": [],
   "DiscoveryPatterns": [],
-  "Assets": [],
-  "Endpoints": []
+  "Assets": []
 }

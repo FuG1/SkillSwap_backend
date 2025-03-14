@@ -1,8 +1,10 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace SkillSwap.Models {
-    public class BaseModel {
+namespace SkillSwap.Models
+{
+    public class BaseModel
+    {
         [Key]
         [Required]
         [Column("id")]
