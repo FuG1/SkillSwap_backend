@@ -2924,23 +2924,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\a9685\\.nuget\\packages\\": {},
+    "C:\\Users\\FuG1\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\a9685\\OneDrive\\Документы\\GitHub\\SkillSwap_backend\\skillswap.csproj",
+      "projectUniqueName": "C:\\Users\\FuG1\\Desktop\\SkillSwap_backend\\skillswap.csproj",
       "projectName": "skillswap",
-      "projectPath": "C:\\Users\\a9685\\OneDrive\\Документы\\GitHub\\SkillSwap_backend\\skillswap.csproj",
-      "packagesPath": "C:\\Users\\a9685\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\a9685\\OneDrive\\Документы\\GitHub\\SkillSwap_backend\\obj\\",
+      "projectPath": "C:\\Users\\FuG1\\Desktop\\SkillSwap_backend\\skillswap.csproj",
+      "packagesPath": "C:\\Users\\FuG1\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\FuG1\\Desktop\\SkillSwap_backend\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\a9685\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\FuG1\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -2967,7 +2967,8 @@
         "enableAudit": "true",
         "auditLevel": "low",
         "auditMode": "direct"
-      }
+      },
+      "SdkAnalysisLevel": "9.0.100"
     },
     "frameworks": {
       "net8.0": {
@@ -3019,7 +3020,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.302/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.103/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
